@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Listado de Clientes";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
+<h2>Listado de Clientes</h2>
+
+<table id="tablaClientes" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre Completo</th>
+        </tr>
+    </thead>
+</table>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#tablaClientes').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: function (data, callback, settings) {
+                    const page = Math.floor(data.start / data.length) + 1;
+                    const pageSize = data.length;
+                    const filtro = data.search.value;
+
+                    $.getJSON(`/api/cliente/page?page=${page}&pageSize=${pageSize}&filtro=${encodeURIComponent(filtro)}`, function (response) {
+                        callback({
+                            draw: data.draw,
+                            recordsTotal: response.totalRegistros,
+                            recordsFiltered: response.totalFiltrados,
+                            data: response.datos
+                        });
+                    });
+                },
+                columns: [
+                    { data: "id" },
+                    { data: "nombreCompleto" }
+                ],
+                pageLength: 25
+            });
+
+        });
+    </script>
+}
